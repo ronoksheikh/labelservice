@@ -1,0 +1,14 @@
+@font-face { font-family: 'Instrument Sans'; font-weight: 400; src: url('/fonts/InstrumentSans-Regular.ttf') format('truetype'); font-display: swap; }
+@font-face { font-family: 'Instrument Sans'; font-weight: 600; src: url('/fonts/InstrumentSans-SemiBold.ttf') format('truetype'); font-display: swap; }
+@font-face { font-family: 'Instrument Sans'; font-weight: 700; src: url('/fonts/InstrumentSans-Bold.ttf') format('truetype'); font-display: swap; }
+@font-face { font-family: 'Instrument Serif'; font-weight: 400; src: url('/fonts/InstrumentSerif-Regular.ttf') format('truetype'); font-display: swap; }
+@font-face { font-family: 'Anek Bangla'; font-weight: 400; src: url('/fonts/AnekBangla-Regular.ttf') format('truetype'); font-display: swap; }
+
+:root { --selected-bg: var(--mantine-color-gray-1); --selected-border: var(--mantine-color-dark-6); }
+[data-mantine-color-scheme='dark'] { --selected-bg: var(--mantine-color-dark-5); --selected-border: var(--mantine-color-gray-4); }
+
+.wordmark { font-family: 'Instrument Serif', serif; letter-spacing: 0.02em; line-height: 1; }
+.selection-bar {
+  position: sticky; bottom: var(--mantine-spacing-md); z-index: 10;
+  box-shadow: var(--mantine-shadow-lg);
+}

@@ -8,5 +8,5 @@ tmp/
 .env.*
 !.env.example
 
-backups/
-data/
+.dev.vars
+.wrangler/
