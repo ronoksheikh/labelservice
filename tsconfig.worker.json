@@ -1,0 +1,16 @@
+{
+  "compilerOptions": {
+    "composite": true,
+    "tsBuildInfoFile": "node_modules/.tmp/worker.tsbuildinfo",
+    "target": "ES2022",
+    "lib": ["ES2023"],
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "skipLibCheck": true,
+    "noEmit": true,
+    "types": []
+  },
+  "include": ["worker", "shared"]
+}

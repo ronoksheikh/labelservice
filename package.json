@@ -1,35 +1,46 @@
 {
   "name": "arvono-labels",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "private": true,
   "type": "module",
-  "description": "A local PDF label importer and print studio for ARVONO.",
-  "engines": {
-    "node": ">=22.13.0"
-  },
+  "description": "ARVONO label printing service on Cloudflare Workers + D1.",
   "packageManager": "bun@1.3.10",
   "scripts": {
-    "build": "tsc",
-    "start": "node --env-file-if-exists=.env dist/index.js",
-    "dev": "bun --watch src/index.ts",
-    "test": "bun run build && node --test test/*.test.mjs",
-    "test:rest": "node scripts/test-rest-api.mjs",
-    "samples": "bun run build && node scripts/samples.mjs",
-    "samples:a4": "bun run build && node scripts/a4-samples.mjs",
-    "samples:thermal": "bun run build && node scripts/thermal-samples.mjs"
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc -b",
+    "test": "bun test",
+    "db:migrate:local": "wrangler d1 migrations apply arvono-labels --local",
+    "db:migrate:remote": "wrangler d1 migrations apply arvono-labels --remote",
+    "deploy": "bun run build && wrangler d1 migrations apply arvono-labels --remote && wrangler deploy",
+    "cf-typegen": "wrangler types worker/worker-configuration.d.ts"
   },
   "dependencies": {
-    "@napi-rs/canvas": "^1.0.11",
+    "@mantine/core": "^9.7.3",
+    "@mantine/hooks": "^9.7.3",
+    "@mantine/modals": "^9.7.3",
+    "@mantine/notifications": "^9.7.3",
+    "@tabler/icons-react": "^3.49.0",
     "bwip-js": "^4.11.4",
-    "fastify": "^5.12.7",
     "fflate": "^0.8.3",
-    "pdfjs-dist": "^6.4.299",
+    "hono": "^4.13.13",
     "pdfkit": "^0.20.2",
-    "tesseract.js": "^7.0.0"
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
+    "react-router-dom": "^7.18.4"
   },
   "devDependencies": {
-    "@types/node": "^26.6.5",
+    "@cloudflare/vite-plugin": "^1.64.0",
     "@types/pdfkit": "^0.17.6",
-    "typescript": "^7.0.2"
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@vitejs/plugin-react": "^6.1.2",
+    "postcss": "^8.5.31",
+    "postcss-preset-mantine": "^1.18.0",
+    "postcss-simple-vars": "^7.0.1",
+    "typescript": "^7.0.2",
+    "vite": "^8.3.4",
+    "wrangler": "^4.151.2"
   }
 }

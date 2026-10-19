@@ -1,0 +1,25 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "arvono-labels",
+  "main": "worker/index.ts",
+  "compatibility_date": "2026-10-01",
+  "assets": {
+    // React app; the Worker only handles /api/*.
+    "not_found_handling": "single-page-application",
+    "run_worker_first": ["/api/*"]
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "arvono-labels",
+      // Replace with the id printed by `bunx wrangler d1 create arvono-labels`.
+      "database_id": "00000000-0000-0000-0000-000000000000",
+      "migrations_dir": "migrations"
+    }
+  ],
+  "vars": {
+    "ARVONO_API_BASE_URL": "https://arvono-fulfillment-os.twriad96.workers.dev/api/v1/dispatch"
+  },
+  // Secrets (wrangler secret put …): ARVONO_API_KEY, DASHBOARD_PASSWORD
+  "observability": { "enabled": true }
+}
