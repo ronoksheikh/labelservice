@@ -1,0 +1,17 @@
+node_modules
+dist
+tmp
+output
+.git
+backups
+data
+.env
+.env.*
+!.env.example
+*.log
+*.pdf
+*.png
+*.jpg
+*.jpeg
+*.zip
+.DS_Store

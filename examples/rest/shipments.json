@@ -1,0 +1,72 @@
+[
+  {
+    "name": "Test Recipient 1",
+    "phone": "01700000000",
+    "address": "House 12, Road 7, Shantinagar, Dhaka 1217, Bangladesh",
+    "cod": 849,
+    "parcelId": "900000001"
+  },
+  {
+    "name": "পরীক্ষামূলক গ্রাহক",
+    "phone": "01700000000",
+    "address": "বাড়ি ১২, রোড ৭, শান্তিনগর, ঢাকা ১২১৭, বাংলাদেশ",
+    "cod": 849,
+    "parcelId": "900000002"
+  },
+  {
+    "name": "Test Recipient 3",
+    "phone": "01700000000",
+    "address": "House 12, Road 7, Shantinagar, Dhaka 1217, Bangladesh",
+    "cod": 849,
+    "parcelId": "900000003"
+  },
+  {
+    "name": "Test Recipient 4",
+    "phone": "01700000000",
+    "address": "House 12, Road 7, Shantinagar, Dhaka 1217, Bangladesh",
+    "cod": 849,
+    "parcelId": "900000004"
+  },
+  {
+    "name": "Test Recipient 5",
+    "phone": "01700000000",
+    "address": "House 12, Road 7, Shantinagar, Dhaka 1217, Bangladesh",
+    "cod": 849,
+    "parcelId": "900000005"
+  },
+  {
+    "name": "Test Recipient 6",
+    "phone": "01700000000",
+    "address": "House 12, Road 7, Shantinagar, Dhaka 1217, Bangladesh",
+    "cod": 849,
+    "parcelId": "900000006"
+  },
+  {
+    "name": "Test Recipient 7",
+    "phone": "01700000000",
+    "address": "House 12, Road 7, Shantinagar, Dhaka 1217, Bangladesh",
+    "cod": 849,
+    "parcelId": "900000007"
+  },
+  {
+    "name": "Test Recipient 8",
+    "phone": "01700000000",
+    "address": "House 12, Road 7, Shantinagar, Dhaka 1217, Bangladesh",
+    "cod": 849,
+    "parcelId": "900000008"
+  },
+  {
+    "name": "Test Recipient 9",
+    "phone": "01700000000",
+    "address": "House 12, Road 7, Shantinagar, Dhaka 1217, Bangladesh",
+    "cod": 849,
+    "parcelId": "900000009"
+  },
+  {
+    "name": "Test Recipient 10",
+    "phone": "01700000000",
+    "address": "House 12, Road 7, Shantinagar, Dhaka 1217, Bangladesh",
+    "cod": 849,
+    "parcelId": "900000010"
+  }
+]

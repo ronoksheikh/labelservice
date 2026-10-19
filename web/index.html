@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f7f6f2">
+  <title>ARVONO — Label Studio</title>
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="/app.css">
+  <script type="module" src="/app.js"></script>
+</head>
+<body>
+  <header class="site-header">
+    <a class="brand" href="/" aria-label="ARVONO Label Studio">ARVONO<span>LABEL STUDIO</span></a>
+    <div class="local-status"><span></span> Your labels. Ready to print.</div>
+  </header>
+  <main>
+    <section class="intro" aria-labelledby="page-title">
+      <div class="intro-copy"><div class="eyebrow">THE FINAL TOUCH, SIMPLIFIED</div><h1 id="page-title">Their PDF.<br> Your signature.</h1><p>Turn courier PDFs into beautifully consistent<br class="desktop-break"> ARVONO shipping labels, ready to print.</p></div>
+      <div class="upload-card" id="drop-zone">
+        <svg class="upload-icon" width="30" height="30" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 16V3m0 0L7 8m5-5 5 5M4 15v5a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <h2>Drop your courier PDF here</h2><p>Steadfast labels · one label per page · up to 10 MiB each</p>
+        <label class="button dark file-button" for="pdf-input">Choose PDF <span aria-hidden="true">↗</span><input id="pdf-input" type="file" accept="application/pdf,.pdf" multiple></label>
+        <span class="upload-footnote" id="upload-note">Processed in memory. Uploaded files aren't stored.</span>
+      </div>
+    </section>
+    <section class="fulfillment-card" aria-labelledby="fulfillment-title">
+      <div class="fulfillment-heading"><div><span class="eyebrow">CONNECTED TO FULFILLMENT</span><h2 id="fulfillment-title">Booked. Ready to label.</h2></div><span class="connection-status" id="connection-status" role="status">Connecting…</span></div>
+      <div class="queue-stats" aria-label="Label totals for the selected booking period"><div><span>Pending labels</span><strong id="queue-unprinted">—</strong></div><div><span>Reserved for printing</span><strong id="queue-reserved">—</strong></div><div><span>Printed labels</span><strong id="queue-printed">—</strong></div></div>
+      <form class="queue-controls" id="queue-form"><label>Booked through <input id="queue-date" type="date" required></label><label>Show <select id="queue-filter"><option value="unprinted">Pending labels</option><option value="printed">Printed labels / reprints</option></select></label><button class="button dark" id="load-orders" type="submit" disabled>Load labels <span aria-hidden="true">↗</span></button><button class="text-button" id="load-more" type="button" hidden>Load more</button></form>
+      <p class="queue-note" id="queue-note" role="status">Includes earlier bookings still waiting to be printed.</p>
+    </section>
+    <div id="notice" class="notice" role="status" hidden></div>
+    <section id="empty-state" class="how-it-works" aria-label="How it works">
+      <div><span>01</span><h3>Bring your courier PDF</h3><p>Import one file or a whole batch.</p></div>
+      <div><span>02</span><h3>Give the details a look</h3><p>SF-ID, recipient, address and COD, all editable.</p></div>
+      <div><span>03</span><h3>Make it ARVONO</h3><p>Print on A4 paper or your label printer.</p></div>
+    </section>
+    <section id="studio" hidden aria-label="Label workspace">
+      <div class="workspace-heading"><div><span class="eyebrow">YOUR WORKSPACE</span><h2>One last look. Then, print.</h2></div><button class="text-button" id="clear-all">Clear all</button></div>
+      <section class="print-settings" aria-label="Print settings">
+        <fieldset class="format-options"><legend>Print on</legend>
+          <label><input type="radio" name="format" value="a4" checked><span>A4 sheets<small>6 labels per sheet</small></span></label>
+          <label><input type="radio" name="format" value="individual"><span>Individual labels<small>Premium dark labels</small></span></label>
+          <label><input type="radio" name="format" value="thermal"><span>Thermal printer<small>Black on white</small></span></label>
+        </fieldset>
+        <div class="format-details" id="a4-settings"><label class="check-label"><input type="checkbox" id="cut-marks" checked> Cutting guides</label><label class="check-label"><input type="checkbox" id="split-sheets"> Separate PDFs in a ZIP</label><span class="dimension-note">3 × 3 in labels · 210 × 297 mm paper</span></div>
+        <div class="format-details" id="individual-settings" hidden><label>Label size <select id="label-size"><option value="3x3">3 × 3 inches</option><option value="4x3">4 × 3 inches</option><option value="4x4">4 × 4 inches</option><option value="4x6">4 × 6 inches</option></select></label><span class="dimension-note">One label per PDF page</span></div>
+        <div class="format-details" id="thermal-settings" hidden><label>Paper size <select id="thermal-size"><option value="4x6">4 × 6 inches</option><option value="3x3">3 × 3 inches</option><option value="100x150mm">100 × 150 mm</option><option value="100x100mm">100 × 100 mm</option><option value="100x75mm">100 × 75 mm</option><option value="80x100mm">80 × 100 mm</option><option value="62x100mm">62 × 100 mm</option><option value="58x100mm">58 × 100 mm</option></select></label><label>Resolution <select id="dpi"><option value="203">203 dpi</option><option value="300">300 dpi</option></select></label><span class="dimension-note">Choose stock supported by your printer</span></div>
+      </section>
+      <div class="reprint-panel" id="reprint-panel" hidden><label class="field" for="reprint-reason">Reason for this reprint<textarea id="reprint-reason" rows="2" minlength="3" maxlength="500" placeholder="For example: damaged label or printer jam"></textarea></label><p>Saved with this print job in the studio’s history.</p></div>
+      <div class="batch-bar"><div><strong id="batch-summary"></strong><span id="batch-status"></span></div><button class="button dark" id="download" disabled><svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 3v12m-5-5 5 5 5-5M4 16v5h16v-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg><span id="download-label">Download PDF</span></button></div>
+      <section class="job-panel" id="job-panel" aria-labelledby="job-title" hidden><div><strong id="job-title">Print job ready</strong><p id="job-description"></p></div><div class="job-actions"><button class="button dark" id="confirm-printed" type="button">Confirm selected printed</button><button class="button outline" id="resume-job" type="button" hidden>Retry preparation</button><button class="text-button" id="release-job" type="button">Release unprinted labels</button></div></section>
+      <div class="workbench">
+        <section class="parcel-panel" aria-labelledby="parcels-title"><div class="panel-heading"><h3 id="parcels-title">Parcels <span id="parcel-count"></span></h3><label class="check-label select-all"><input id="select-all" type="checkbox" checked> All</label></div><ul id="parcel-list" class="parcel-list"></ul><div class="panel-footnote">SF-ID becomes your parcel ID.</div></section>
+        <section class="editor-panel" aria-labelledby="details-title"><div class="panel-heading"><h3 id="details-title">Recipient details</h3><span class="mini-note">Editable</span></div><div class="editor-body">
+          <div class="source-line" id="source-line"></div>
+          <form id="details-form" novalidate>
+            <label class="field">Parcel ID <span class="field-hint">from SF-ID</span><input name="parcelId" id="field-parcelId" maxlength="80" autocomplete="off" spellcheck="false"><span class="field-error" id="error-parcelId"></span></label>
+            <label class="field">Recipient name<input name="name" id="field-name" maxlength="160" autocomplete="off"><span class="field-error" id="error-name"></span></label>
+            <div class="field-pair"><label class="field">Phone<input name="phone" id="field-phone" maxlength="40" type="tel" autocomplete="off"><span class="field-error" id="error-phone"></span></label><label class="field">COD <span class="field-hint">BDT</span><input name="cod" id="field-cod" inputmode="decimal" autocomplete="off"><span class="field-error" id="error-cod"></span></label></div>
+            <label class="field">Delivery address<textarea name="address" id="field-address" rows="4" maxlength="1600" autocomplete="off"></textarea><span class="field-error" id="error-address"></span></label>
+          </form>
+          <div class="review-note" id="review-note" hidden></div>
+          <label class="check-label manual-review" id="manual-review-label" hidden><input type="checkbox" id="manual-review"> <span id="manual-review-text">I checked these details against the original.</span></label>
+          <dl class="source-metadata" id="source-metadata"></dl>
+        </div><div class="panel-footnote" id="details-footnote">Changes stay in this tab until you clear or close it.</div></section>
+        <section class="preview-panel" aria-labelledby="preview-title"><div class="panel-heading"><h3 id="preview-title">Print preview</h3><span class="mini-note" id="preview-dimensions"></span></div>
+          <div class="preview-tabs" role="tablist" aria-label="Preview type"><button role="tab" id="tab-label" aria-selected="true" aria-controls="preview-content" data-preview="label">ARVONO label</button><button role="tab" id="tab-sheet" aria-selected="false" aria-controls="preview-content" data-preview="sheet" tabindex="-1">A4 sheet</button><button role="tab" id="tab-original" aria-selected="false" aria-controls="preview-content" data-preview="original" tabindex="-1">Original PDF</button></div>
+          <div class="preview-stage" id="preview-content" role="tabpanel" aria-labelledby="tab-label"><div class="preview-message" id="preview-message" role="status">Preparing preview…</div><canvas id="preview-canvas" hidden aria-label="PDF page preview"></canvas></div>
+          <div class="preview-caption" id="preview-caption"></div><p class="print-tip" id="print-tip"></p>
+        </section>
+      </div>
+    </section>
+    <section class="history-section" aria-labelledby="history-title"><div class="workspace-heading"><div><span class="eyebrow">SAVED IN YOUR STUDIO</span><h2 id="history-title">Print history</h2></div><button class="text-button" id="refresh-history" type="button">Refresh history</button></div><p class="history-note">Print jobs, confirmation times and reprint reasons. Dates and filenames use Bangladesh time.</p><div id="history-list" class="history-list" role="status">No saved print jobs yet.</div></section>
+  </main>
+  <footer><span>ARVONO <span class="footer-divider">/</span> MADE TO ARRIVE WELL.</span><span>Instrument Serif · Anek Bangla</span></footer>
+</body>
+</html>
