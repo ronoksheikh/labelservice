@@ -1,44 +1,60 @@
-import { useEffect } from 'react';
 import { Center, Loader } from '@mantine/core';
-import { Route, Routes } from 'react-router-dom';
-import { useApi } from './useApi';
-import type { Session } from '../shared/api';
-import { Login } from './pages/Login';
-import { Layout } from './pages/Layout';
-import { Overview } from './pages/Overview';
-import { Queue } from './pages/Queue';
-import { Links } from './pages/Links';
-import { LinkDetail } from './pages/LinkDetail';
-import { Share } from './pages/Share';
+import { lazy, Suspense, useEffect } from 'react';
+import { Route, Routes, useLocation } from 'react-router-dom';
+import { ABOUT, PRIVACY, REFUNDS, TERMS } from '../shared/content';
+import { PublicLayout } from './components/SiteChrome';
+import { trackPageview } from './track';
+import { Home } from './pages/Home';
+import { CoursePage } from './pages/CoursePage';
+import { StaticPageView } from './pages/StaticPageView';
+import { NotFound } from './pages/NotFound';
 
-function Staff() {
-  const session = useApi<Session>('/session');
+// Pages most visitors never open load on demand.
+const CheckoutStatus = lazy(() => import('./pages/CheckoutStatus').then((m) => ({ default: m.CheckoutStatus })));
+const Login = lazy(() => import('./pages/Login').then((m) => ({ default: m.Login })));
+const AuthVerify = lazy(() => import('./pages/Login').then((m) => ({ default: m.AuthVerify })));
+const MyCourses = lazy(() => import('./pages/student/MyCourses').then((m) => ({ default: m.MyCourses })));
+const Classroom = lazy(() => import('./pages/student/Classroom').then((m) => ({ default: m.Classroom })));
+const AdminApp = lazy(() => import('./pages/admin/AdminApp').then((m) => ({ default: m.AdminApp })));
+
+function PageLoader() {
+  return <Center h="60dvh"><Loader color="ink" type="dots" /></Center>;
+}
+
+/** Scroll to the top (or to #hash) on navigation, and count the page view. */
+function useNavigationEffects() {
+  const { pathname, hash } = useLocation();
   useEffect(() => {
-    const signedOut = () => session.setData((current) => current && { ...current, authenticated: false });
-    window.addEventListener('arvono:signed-out', signedOut);
-    return () => window.removeEventListener('arvono:signed-out', signedOut);
-  }, [session.setData]);
-
-  if (!session.data) return <Center h="100vh"><Loader /></Center>;
-  if (!session.data.authenticated) return <Login onSignedIn={session.reload} />;
-  return (
-    <Layout session={session.data}>
-      <Routes>
-        <Route index element={<Overview session={session.data} />} />
-        <Route path="queue" element={<Queue today={session.data.today} />} />
-        <Route path="links" element={<Links />} />
-        <Route path="links/:id" element={<LinkDetail today={session.data.today} />} />
-        <Route path="*" element={<Overview session={session.data} />} />
-      </Routes>
-    </Layout>
-  );
+    trackPageview(pathname);
+    if (hash) {
+      // Wait a frame so the target section exists.
+      requestAnimationFrame(() => document.getElementById(hash.slice(1))?.scrollIntoView({ behavior: 'smooth', block: 'start' }));
+    } else {
+      window.scrollTo(0, 0);
+    }
+  }, [pathname, hash]);
 }
 
 export function App() {
+  useNavigationEffects();
   return (
-    <Routes>
-      <Route path="/p/:token" element={<Share />} />
-      <Route path="/*" element={<Staff />} />
-    </Routes>
+    <Suspense fallback={<PageLoader />}>
+      <Routes>
+        <Route element={<PublicLayout />}>
+          <Route index element={<Home />} />
+          {[ABOUT, PRIVACY, TERMS, REFUNDS].map((page) => (
+            <Route key={page.path} path={page.path} element={<StaticPageView page={page} />} />
+          ))}
+          <Route path="login" element={<Login />} />
+          <Route path="auth" element={<AuthVerify />} />
+          <Route path="my" element={<MyCourses />} />
+          <Route path="*" element={<NotFound />} />
+        </Route>
+        <Route path="courses/:slug" element={<CoursePage />} />
+        <Route path="checkout/:id" element={<CheckoutStatus />} />
+        <Route path="learn/:slug/:lessonId?" element={<Classroom />} />
+        <Route path="admin/*" element={<AdminApp />} />
+      </Routes>
+    </Suspense>
   );
 }

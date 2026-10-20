@@ -1,6 +1,5 @@
 import { notifications } from '@mantine/notifications';
+import { errorMessage } from './api';
 
-export const notifyError = (error: unknown) =>
-  notifications.show({ color: 'red', title: 'Something went wrong', message: error instanceof Error ? error.message : String(error) });
-export const notifySuccess = (message: string, title?: string) =>
-  notifications.show({ color: 'teal', title, message });
+export const notifySuccess = (message: string) => notifications.show({ color: 'teal', message });
+export const notifyError = (error: unknown) => notifications.show({ color: 'red', title: 'Something went wrong', message: errorMessage(error) });

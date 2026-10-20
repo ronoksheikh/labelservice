@@ -4,3 +4,4 @@ export class HttpError extends Error {
   }
 }
 export const badRequest = (message: string): never => { throw new HttpError(400, message); };
+export const notFound = (message = 'Not found.'): never => { throw new HttpError(404, message); };

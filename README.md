@@ -1,85 +1,81 @@
-# ARVONO Labels
+# 2bytes.dev
 
-A small label printing service that runs entirely on **Cloudflare Workers** with a **Cloudflare D1** database. Staff pick booked orders from ARVONO, create a **print link**, and send it to a print shop. The shop opens the link, downloads the labels in the format it needs (A4 sheets, label pages or a thermal roll), prints them, and confirms what came out. Reprints always carry a reason.
+The course platform for **2bytes.dev**, run by Fahimun Tasin and Ronok Sheikh. It runs entirely on **Cloudflare**: one Worker serves the site, the API and uploaded images, with a **D1** database and an **R2** bucket.
 
-- **Frontend:** React + [Mantine](https://mantine.dev), served as Workers static assets.
-- **API:** a Hono Worker under `/api/*`, talking to the ARVONO dispatch API (`/printable`, `/summary`, `/claim`, `/printed`, `/release`).
-- **Database:** D1 stores every print link, the order snapshot it was created with, and an event history (created, reserved, downloaded, printed, released, reprint reason).
-- **Labels:** the original PDFKit renderer, ported unchanged to run in the browser. Output is pixel-identical to the previous Node service: same ARVONO design, fonts (Instrument Serif/Sans, Anek Bangla), Code 128 barcode, A4 sheet layout with cut marks and ruler, and thermal presets. PDFs are generated on the print shop's computer, so the Worker never does heavy CPU work.
+- **Frontend:** React + [Mantine](https://mantine.dev), served as Workers static assets. Black-and-white theme, Instrument Sans (English) and Anek Bangla (Bangla), self-hosted woff2 subsets.
+- **API:** [Hono](https://hono.dev) under `/api/*` (`worker/index.ts`).
+- **Database:** D1 (`migrations/0001_init.sql`). Prices are whole Taka (BDT).
+- **Email:** [Resend](https://resend.com) for purchase and sign-in emails.
+- **Payments:** not connected yet. EPS (Easy Payment System) plugs into `worker/payments.ts`.
 
-## How it works
+## What's inside
 
-```
-Staff dashboard                              Print shop (/p/<token>, no login)
-───────────────                              ─────────────────────────────────
-Print queue → select labels → Create link    Choose A4 / label pages / thermal
-   POST /claim (24 h reservation)             Download PDF (or ZIP of A4 sheets)
-   saved in D1 with a share token     ──▶     Untick anything that failed
-                                              Confirm printed → POST /printed
-Printed tab → select → Request reprint        (unticked labels are released)
-   reason required, saved in D1              "Report a problem" → POST /release
-```
+**Public site**
+- `/` lists published courses, with skeleton loading, an FAQ and the team.
+- `/courses/<slug>` is a high-converting course and checkout page with the course on the left and payment details on the right. Buyers enter name, email and phone (+880), with an optional coupon and an optional **exclusive offer** (order bump). On mobile, a sticky price and *Buy now* bar takes them to the form.
+- `/about`, `/privacy`, `/terms` and `/refunds` (copy lives in `shared/content.ts`).
+- **No accounts.** After paying, buyers are signed in on the same browser and get an email with a one-time sign-in link. `/login` sends a new link at any time.
 
-| Print link status | Meaning |
-|---|---|
-| Waiting for print | Labels reserved in ARVONO (or a reprint recorded); the shop can download. |
-| Printed / Partly printed | The shop confirmed. Labels it unticked went back to ARVONO's queue. |
-| Released | Staff or the shop cancelled the link; reserved labels went back to the queue. |
-| Expired | ARVONO's 24-hour reservation ran out before confirmation. Release it and create a new link. |
-| Failed | None of the labels were still waiting to print. |
+**Course area** (`/my`, `/learn/<slug>/<lesson>`)
+- My courses with progress bars, a video player (YouTube, Vimeo, Bunny or Cloudflare Stream embeds, or `.mp4`), the lesson list grouped by section, *Mark as complete*, and *Complete & continue*.
 
-Every ARVONO `POST` uses an `Idempotency-Key` stored with the link, so a retry after a network error never reserves or confirms twice. Creating a link is idempotent too (the dashboard sends one UUID per attempt).
+**Admin panel** (`/admin`, one shared password)
+- **Dashboard:** visitors, checkouts started, purchases, revenue and conversion rate for today, 7, 30 or 90 days (Bangladesh time). Also a daily chart, per-course funnel, traffic sources (Facebook is detected from `fbclid` and referrers), countries and the latest orders.
+- **Courses:** title, URL slug, description (simple Markdown with preview), cover upload to R2, price and struck-through regular price, draft or published, sort order, the checkout offer, and a lessons editor. Editing lessons keeps student progress.
+- **Coupons:** percent or Taka off, for all courses or one course, with max uses, expiry and on/off.
+- **Orders:** every checkout, paid or not (unpaid ones are leads to follow up). **Mark as paid** records a payment taken outside the site, enrolls the buyer and emails them. This is also how you test the full flow before EPS is connected.
+- **Students:** search, see their courses and spend, grant or remove access.
 
-### Reprints
-
-ARVONO only accepts `POST /reprint` from a signed-in staff session, not an API key. So reprints are recorded **here**: staff choose printed labels (from **Print queue → Printed · reprint**, or from a finished print link), pick or type a reason (*Label damaged/smudged*, *Printer jam – label lost*, …), and send the reprint link to the shop. The reason is shown to the shop and kept in the link's history. ARVONO's `printCount` isn't changed by these reprints. Labels that staff sent back for reprint in the ARVONO dashboard show up in the normal queue with a **printed ×N** badge.
+**SEO and speed**
+- Public pages are rendered by the Worker with the right `<title>`, description, canonical URL, Open Graph and Twitter tags (what Facebook shows when a link is shared), and JSON-LD (`Course` with BDT offer, `Organization`, `FAQPage`, breadcrumbs). It also puts crawlable HTML inside `#root`.
+- The page data is inlined, so the course page renders without waiting for the API. Admin and student pages load on demand.
+- `/sitemap.xml` (published courses) and `/robots.txt` are generated by the Worker.
+- No Facebook Pixel or other third-party trackers. Analytics are first-party in D1, and bots are filtered out.
 
 ## Setup
 
-Requires [Bun](https://bun.sh) and a Cloudflare account.
+Requires [Bun](https://bun.sh) and a Cloudflare account with `2bytes.dev` on it.
 
 ```sh
 bun install
 bunx wrangler login
-bunx wrangler d1 create arvono-labels       # copy the database_id into wrangler.jsonc
-bunx wrangler secret put ARVONO_API_KEY      # key with dispatch:read and dispatch:print
-bunx wrangler secret put DASHBOARD_PASSWORD  # staff sign-in password
-bun run deploy                               # build, apply D1 migrations, deploy
+bunx wrangler d1 create 2bytes                 # copy the database_id into wrangler.jsonc
+bunx wrangler r2 bucket create 2bytes-media
+bunx wrangler secret put SESSION_SECRET        # any long random string
+bunx wrangler secret put ADMIN_PASSWORD        # admin panel password
+bunx wrangler secret put RESEND_API_KEY        # from resend.com, with 2bytes.dev verified as a sending domain
+bun run deploy                                 # build, apply D1 migrations, deploy
 ```
 
-`ARVONO_API_BASE_URL` is set in `wrangler.jsonc`.
+`SITE_URL`, `EMAIL_FROM` and `EMAIL_REPLY_TO` are set in `wrangler.jsonc`. The `routes` entry attaches the Worker to `2bytes.dev` as a custom domain. Remove it to deploy on `workers.dev` only.
 
 ### Local development
 
 ```sh
-cp .dev.vars.example .dev.vars    # fill in ARVONO_API_KEY and DASHBOARD_PASSWORD
+cp .dev.vars.example .dev.vars    # set SESSION_SECRET and ADMIN_PASSWORD
 bun run db:migrate:local
-bun run dev                       # http://localhost:5173
+bun run db:seed:local             # optional: 3 demo courses, coupons LAUNCH20 and FREEBIE
+bun run dev                       # http://localhost:5173 , admin at /admin
 ```
 
-`bun run test` runs the label renderer tests against PDFKit's browser build; `bun run typecheck` checks the app and Worker.
+Without `RESEND_API_KEY`, emails (including sign-in links) are printed in the terminal. `bun run test` runs the unit tests and `bun run typecheck` checks the app and Worker.
 
-## Security
+## Connecting EPS
 
-- The dashboard needs the `DASHBOARD_PASSWORD`. Sessions are HMAC-signed, HttpOnly cookies; changing the password signs everyone out. For SSO, you can also put the dashboard behind [Cloudflare Access](https://developers.cloudflare.com/cloudflare-one/policies/access/) (leave `/p/*` and `/api/share/*` public).
-- Print links are unguessable 144-bit tokens. A link only exposes the labels on it and can only confirm or release those labels.
-- The ARVONO API key stays in a Worker secret and is never sent to the browser.
-- All `POST`s require an `X-Requested-With: arvono-labels` header, which blocks cross-site form posts.
+`worker/payments.ts` defines the gateway interface. When the EPS details are in:
 
-## Source
+1. Implement `start()` to create the EPS payment and return its URL. Checkout already sends the buyer there, with success, fail and cancel URLs that return to `/checkout/<order>`.
+2. Add the EPS callback or IPN route in `worker/index.ts`. Verify the payment with EPS, then call `new Orders(env).fulfill(orderId, 'eps', transactionId, origin, waitUntil)`. It is idempotent. It marks the order paid, enrolls the buyer in every course on it, counts the coupon use and sends the email.
+3. Mark failed or cancelled payments with `Orders.setStatus`.
 
-```text
-worker/
-  index.ts       API routes: staff (/api/*) and print shop (/api/share/:token/*)
-  requests.ts    Print link workflow on D1: claim, confirm, release, reprint, history
-  arvono.ts      ARVONO dispatch API client
-  auth.ts        Password sign-in and signed session cookie
-migrations/      D1 schema
-shared/api.ts    Types shared by the Worker and the app
-src/
-  labels/        Label renderer (PDFKit, barcode, A4 sheet, thermal presets)
-  pages/         Overview, Print queue, Print links, link details, print-shop page
-  components/    Tables, format picker, create-link and release dialogs
-public/fonts/    Embedded fonts and their SIL licenses
-test/            Renderer tests
+The order page polls its status, so the buyer sees "You're in!" as soon as the payment is confirmed.
+
+## Layout
+
+```
+worker/      Hono API, SEO page rendering, auth, D1 data access, email, payments
+shared/      Types, Markdown renderer, site constants, static page copy (used by both sides)
+src/         React app: pages/ (public, student/, admin/), components/
+migrations/  D1 schema
+seed/        Demo data for local development
 ```

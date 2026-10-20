@@ -1,25 +1,36 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "arvono-labels",
+  "name": "2bytes",
   "main": "worker/index.ts",
   "compatibility_date": "2026-10-01",
   "assets": {
-    // React app; the Worker only handles /api/*.
+    "binding": "ASSETS",
     "not_found_handling": "single-page-application",
-    "run_worker_first": ["/api/*"]
+    // The Worker answers the API and renders public pages with SEO tags; everything else is the static React app.
+    "run_worker_first": [
+      "/api/*", "/", "/courses/*", "/about", "/privacy", "/terms", "/refunds", "/robots.txt", "/sitemap.xml", "/media/*"
+    ]
   },
   "d1_databases": [
     {
       "binding": "DB",
-      "database_name": "arvono-labels",
-      // Replace with the id printed by `bunx wrangler d1 create arvono-labels`.
+      "database_name": "2bytes",
+      // Replace with the id printed by `bunx wrangler d1 create 2bytes`.
       "database_id": "00000000-0000-0000-0000-000000000000",
       "migrations_dir": "migrations"
     }
   ],
+  "r2_buckets": [
+    // Course images uploaded from the admin panel, served at /media/*. Create with `bunx wrangler r2 bucket create 2bytes-media`.
+    { "binding": "MEDIA", "bucket_name": "2bytes-media" }
+  ],
   "vars": {
-    "ARVONO_API_BASE_URL": "https://arvono-fulfillment-os.twriad96.workers.dev/api/v1/dispatch"
+    "SITE_URL": "https://2bytes.dev",
+    "EMAIL_FROM": "2bytes.dev <hello@2bytes.dev>",
+    "EMAIL_REPLY_TO": "hello@2bytes.dev"
   },
-  // Secrets (wrangler secret put …): ARVONO_API_KEY, DASHBOARD_PASSWORD
+  // Serves the site on 2bytes.dev (the domain must be on this Cloudflare account). Remove to deploy on workers.dev only.
+  "routes": [{ "pattern": "2bytes.dev", "custom_domain": true }],
+  // Secrets (bunx wrangler secret put …): SESSION_SECRET, ADMIN_PASSWORD, RESEND_API_KEY
   "observability": { "enabled": true }
 }

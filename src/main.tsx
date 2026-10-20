@@ -12,8 +12,8 @@ import { App } from './App';
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <MantineProvider theme={theme} defaultColorScheme="auto">
-      <Notifications position="top-right" />
+    <MantineProvider theme={theme} forceColorScheme="light">
+      <Notifications position="top-center" />
       <ModalsProvider>
         <BrowserRouter>
           <App />
