@@ -26,7 +26,7 @@ export async function sendEmail(env: Env, mail: Mail) {
   if (!response.ok) throw new Error(`Resend failed (HTTP ${response.status}): ${await response.text()}`);
 }
 
-const FLAME = 'https://2bytes.dev/logo-mark.png';
+const FLAME = 'https://twobytes.dev/logo-mark.png';
 
 function render(mail: Mail) {
   const paragraphs = mail.lines

@@ -21,9 +21,9 @@ export function LogoMark({ size = 28, cutout = '#fff' }: { size?: number; cutout
 
 export function Logo({ size = 26, to = '/' }: { size?: number; to?: string }) {
   return (
-    <Link to={to} className="logo" aria-label="2bytes.dev home">
+    <Link to={to} className="logo" aria-label="twobytes.dev home">
       <LogoMark size={size} />
-      <span className="logo-word" style={{ fontSize: size * 0.78 }}>2bytes<span>.dev</span></span>
+      <span className="logo-word" style={{ fontSize: size * 0.78 }}>twobytes<span>.dev</span></span>
     </Link>
   );
 }

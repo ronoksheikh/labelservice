@@ -1,6 +1,6 @@
-# 2bytes.dev
+# twobytes.dev
 
-The course platform for **2bytes.dev**, run by Fahimun Tasin and Ronok Sheikh. It runs entirely on **Cloudflare**: one Worker serves the site, the API and uploaded images, with a **D1** database and an **R2** bucket.
+The course platform for **twobytes.dev**, run by Fahimun Tasin and Ronok Sheikh. It runs entirely on **Cloudflare**: one Worker serves the site, the API and uploaded images, with a **D1** database and an **R2** bucket.
 
 - **Frontend:** React + [Mantine](https://mantine.dev), served as Workers static assets. Black-and-white theme, Instrument Sans (English) and Anek Bangla (Bangla), self-hosted woff2 subsets.
 - **API:** [Hono](https://hono.dev) under `/api/*` (`worker/index.ts`).
@@ -34,20 +34,20 @@ The course platform for **2bytes.dev**, run by Fahimun Tasin and Ronok Sheikh. I
 
 ## Setup
 
-Requires [Bun](https://bun.sh) and a Cloudflare account with `2bytes.dev` on it.
+Requires [Bun](https://bun.sh) and a Cloudflare account with `twobytes.dev` on it.
 
 ```sh
 bun install
 bunx wrangler login
-bunx wrangler d1 create 2bytes                 # copy the database_id into wrangler.jsonc
-bunx wrangler r2 bucket create 2bytes-media
+bunx wrangler d1 create twobytes                 # copy the database_id into wrangler.jsonc
+bunx wrangler r2 bucket create twobytes-media
 bunx wrangler secret put SESSION_SECRET        # any long random string
 bunx wrangler secret put ADMIN_PASSWORD        # admin panel password
-bunx wrangler secret put RESEND_API_KEY        # from resend.com, with 2bytes.dev verified as a sending domain
+bunx wrangler secret put RESEND_API_KEY        # from resend.com, with twobytes.dev verified as a sending domain
 bun run deploy                                 # build, apply D1 migrations, deploy
 ```
 
-`SITE_URL`, `EMAIL_FROM` and `EMAIL_REPLY_TO` are set in `wrangler.jsonc`. The `routes` entry attaches the Worker to `2bytes.dev` as a custom domain. Remove it to deploy on `workers.dev` only.
+`SITE_URL`, `EMAIL_FROM` and `EMAIL_REPLY_TO` are set in `wrangler.jsonc`. The `routes` entry attaches the Worker to `twobytes.dev` as a custom domain. Remove it to deploy on `workers.dev` only.
 
 ### Local development
 

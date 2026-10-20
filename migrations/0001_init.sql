@@ -1,4 +1,4 @@
--- 2bytes.dev course platform. Times are unix milliseconds, money is whole Taka (BDT).
+-- twobytes.dev course platform. Times are unix milliseconds, money is whole Taka (BDT).
 
 CREATE TABLE courses (
   id INTEGER PRIMARY KEY AUTOINCREMENT,

@@ -11,8 +11,8 @@ export interface StaticPage {
 export const ABOUT: StaticPage = {
   path: '/about',
   title: 'About us',
-  description: '2bytes.dev is run by two people: Fahimun Tasin and Ronok Sheikh. Practical, focused courses for learners in Bangladesh.',
-  body: `2bytes.dev is a small, independent course platform. The entire platform, from the courses and the videos to this website and the support inbox, is run by **two people**: **Fahimun Tasin** and **Ronok Sheikh**.
+  description: 'twobytes.dev is run by two people: Fahimun Tasin and Ronok Sheikh. Practical, focused courses for learners in Bangladesh.',
+  body: `twobytes.dev is a small, independent course platform. The entire platform, from the courses and the videos to this website and the support inbox, is run by **two people**: **Fahimun Tasin** and **Ronok Sheikh**.
 
 That's where the name comes from: two bytes, two builders. We make every course ourselves and answer every email ourselves.
 
@@ -25,13 +25,13 @@ That's where the name comes from: two bytes, two builders. We make every course 
 
 ## Get in touch
 
-Have a question about a course or your purchase? Email us at [hello@2bytes.dev](mailto:hello@2bytes.dev) and one of us will reply personally.`,
+Have a question about a course or your purchase? Email us at [hello@twobytes.dev](mailto:hello@twobytes.dev) and one of us will reply personally.`,
 };
 
 export const PRIVACY: StaticPage = {
   path: '/privacy',
   title: 'Privacy policy',
-  description: 'How 2bytes.dev collects, uses and protects your information.',
+  description: 'How twobytes.dev collects, uses and protects your information.',
   body: `We collect only what we need to sell you a course and give you access to it.
 
 ## What we collect
@@ -50,14 +50,14 @@ We never sell your information. We share it only with the services that run this
 
 ## Your choices
 
-You can ask us to correct or delete your information at any time by emailing [hello@2bytes.dev](mailto:hello@2bytes.dev).`,
+You can ask us to correct or delete your information at any time by emailing [hello@twobytes.dev](mailto:hello@twobytes.dev).`,
 };
 
 export const TERMS: StaticPage = {
   path: '/terms',
   title: 'Terms of service',
-  description: 'The terms for buying and using courses on 2bytes.dev.',
-  body: `By buying a course on 2bytes.dev you agree to these terms.
+  description: 'The terms for buying and using courses on twobytes.dev.',
+  body: `By buying a course on twobytes.dev you agree to these terms.
 
 ## Your access
 
@@ -76,16 +76,16 @@ You don't need a password. You sign in with a link sent to the email address you
 
 ## Contact
 
-Questions? Email [hello@2bytes.dev](mailto:hello@2bytes.dev).`,
+Questions? Email [hello@twobytes.dev](mailto:hello@twobytes.dev).`,
 };
 
 export const REFUNDS: StaticPage = {
   path: '/refunds',
   title: 'Refund policy',
-  description: 'Refund policy for courses bought on 2bytes.dev.',
+  description: 'Refund policy for courses bought on twobytes.dev.',
   body: `We want you to be happy with what you learn.
 
-- If a course isn't right for you, email [hello@2bytes.dev](mailto:hello@2bytes.dev) within **7 days** of purchase with your order email, and tell us briefly why.
+- If a course isn't right for you, email [hello@twobytes.dev](mailto:hello@twobytes.dev) within **7 days** of purchase with your order email, and tell us briefly why.
 - Refunds are sent back through the original payment method, usually within 7–10 working days.
 - Refunds aren't available once most of a course has been completed, or for repeated purchases and refunds of the same course.`,
 };

@@ -27,8 +27,8 @@ export function AdminApp() {
   const session = useApi<{ signedIn: boolean; configured: boolean }>('/admin/session');
   useEffect(() => {
     const onSignedOut = () => session.setData((current) => current && { ...current, signedIn: false });
-    window.addEventListener('2bytes:admin-signed-out', onSignedOut);
-    return () => window.removeEventListener('2bytes:admin-signed-out', onSignedOut);
+    window.addEventListener('twobytes:admin-signed-out', onSignedOut);
+    return () => window.removeEventListener('twobytes:admin-signed-out', onSignedOut);
   }, [session]);
 
   if (!session.data) return <Center h="100dvh"><Loader color="ink" type="dots" /></Center>;

@@ -30,7 +30,7 @@ export function CheckoutStatus() {
         <Group justify="center" mb={40}><Logo /></Group>
         {error ? (
           <Alert color="red" variant="light" title="We couldn't find this order">
-            {error.message} If you paid, check your email for your course link or contact hello@2bytes.dev.
+            {error.message} If you paid, check your email for your course link or contact hello@twobytes.dev.
           </Alert>
         ) : !order ? (
           <Paper p="xl" withBorder><Stack><Skeleton h={56} w={56} circle mx="auto" /><Skeleton h={24} w="60%" mx="auto" /><Skeleton h={120} /></Stack></Paper>
@@ -84,7 +84,7 @@ export function CheckoutStatus() {
             </Stack>
           </Paper>
         )}
-        <Text ta="center" c="dimmed" fz={13} mt="lg">Questions? Email <a href="mailto:hello@2bytes.dev">hello@2bytes.dev</a></Text>
+        <Text ta="center" c="dimmed" fz={13} mt="lg">Questions? Email <a href="mailto:hello@twobytes.dev">hello@twobytes.dev</a></Text>
       </Container>
     </Box>
   );

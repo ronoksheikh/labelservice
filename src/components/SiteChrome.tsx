@@ -53,7 +53,7 @@ export function SiteFooter() {
             <Stack gap={8}>
               <Text fw={600} fz={14}>Company</Text>
               <Anchor component={Link} to="/about" c="dimmed" fz={14}>About us</Anchor>
-              <Anchor href="mailto:hello@2bytes.dev" c="dimmed" fz={14}>Contact</Anchor>
+              <Anchor href="mailto:hello@twobytes.dev" c="dimmed" fz={14}>Contact</Anchor>
             </Stack>
             <Stack gap={8}>
               <Text fw={600} fz={14}>Legal</Text>

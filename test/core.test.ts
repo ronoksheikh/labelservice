@@ -64,9 +64,9 @@ describe('site helpers', () => {
     expect(videoEmbed('javascript:alert(1)')).toBeNull();
   });
   test('traffic sources', () => {
-    expect(trafficSource('https://2bytes.dev/?fbclid=x', '', '2bytes.dev')).toBe('facebook');
-    expect(trafficSource('https://2bytes.dev/', 'https://l.facebook.com/', '2bytes.dev')).toBe('facebook');
-    expect(trafficSource('https://2bytes.dev/?utm_source=Newsletter', '', '2bytes.dev')).toBe('newsletter');
-    expect(trafficSource('https://2bytes.dev/', 'https://2bytes.dev/about', '2bytes.dev')).toBe('direct');
+    expect(trafficSource('https://twobytes.dev/?fbclid=x', '', 'twobytes.dev')).toBe('facebook');
+    expect(trafficSource('https://twobytes.dev/', 'https://l.facebook.com/', 'twobytes.dev')).toBe('facebook');
+    expect(trafficSource('https://twobytes.dev/?utm_source=Newsletter', '', 'twobytes.dev')).toBe('newsletter');
+    expect(trafficSource('https://twobytes.dev/', 'https://twobytes.dev/about', 'twobytes.dev')).toBe('direct');
   });
 });

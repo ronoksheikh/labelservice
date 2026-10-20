@@ -1,6 +1,6 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "2bytes",
+  "name": "twobytes",
   "main": "worker/index.ts",
   "compatibility_date": "2026-10-01",
   "assets": {
@@ -14,23 +14,23 @@
   "d1_databases": [
     {
       "binding": "DB",
-      "database_name": "2bytes",
-      // Replace with the id printed by `bunx wrangler d1 create 2bytes`.
+      "database_name": "twobytes",
+      // Replace with the id printed by `bunx wrangler d1 create twobytes`.
       "database_id": "00000000-0000-0000-0000-000000000000",
       "migrations_dir": "migrations"
     }
   ],
   "r2_buckets": [
-    // Course images uploaded from the admin panel, served at /media/*. Create with `bunx wrangler r2 bucket create 2bytes-media`.
-    { "binding": "MEDIA", "bucket_name": "2bytes-media" }
+    // Course images uploaded from the admin panel, served at /media/*. Create with `bunx wrangler r2 bucket create twobytes-media`.
+    { "binding": "MEDIA", "bucket_name": "twobytes-media" }
   ],
   "vars": {
-    "SITE_URL": "https://2bytes.dev",
-    "EMAIL_FROM": "2bytes.dev <hello@2bytes.dev>",
-    "EMAIL_REPLY_TO": "hello@2bytes.dev"
+    "SITE_URL": "https://twobytes.dev",
+    "EMAIL_FROM": "twobytes.dev <hello@twobytes.dev>",
+    "EMAIL_REPLY_TO": "hello@twobytes.dev"
   },
-  // Serves the site on 2bytes.dev (the domain must be on this Cloudflare account). Remove to deploy on workers.dev only.
-  "routes": [{ "pattern": "2bytes.dev", "custom_domain": true }],
+  // Serves the site on twobytes.dev (the domain must be on this Cloudflare account). Remove to deploy on workers.dev only.
+  "routes": [{ "pattern": "twobytes.dev", "custom_domain": true }],
   // Secrets (bunx wrangler secret put …): SESSION_SECRET, ADMIN_PASSWORD, RESEND_API_KEY
   "observability": { "enabled": true }
 }

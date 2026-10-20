@@ -1,9 +1,9 @@
 export const SITE = {
-  name: '2bytes.dev',
-  url: 'https://2bytes.dev',
+  name: 'twobytes.dev',
+  url: 'https://twobytes.dev',
   tagline: 'Practical courses for builders, made in Bangladesh.',
   description:
-    '2bytes.dev is a small course platform run by two developers in Bangladesh. Learn practical, real-world skills with short, focused video courses, priced in Taka.',
+    'twobytes.dev is a small course platform run by two developers in Bangladesh. Learn practical, real-world skills with short, focused video courses, priced in Taka.',
   founders: ['Fahimun Tasin', 'Ronok Sheikh'],
   locale: 'en_BD',
 } as const;

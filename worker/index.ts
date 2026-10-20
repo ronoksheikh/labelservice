@@ -36,7 +36,7 @@ api.onError((error, c) => {
 
 api.use('*', async (c, next) => {
   // A custom header can't be sent cross-site without a CORS preflight, which blocks CSRF on cookie-authenticated requests.
-  if (c.req.method !== 'GET' && c.req.header('X-Requested-With') !== '2bytes') throw new HttpError(403, 'Missing X-Requested-With header.');
+  if (c.req.method !== 'GET' && c.req.header('X-Requested-With') !== 'twobytes') throw new HttpError(403, 'Missing X-Requested-With header.');
   await next();
   if (!c.res.headers.has('Cache-Control')) c.header('Cache-Control', 'no-store');
 });
