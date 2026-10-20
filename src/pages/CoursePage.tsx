@@ -64,7 +64,7 @@ function CourseInfo({ course }: { course: CourseDetail }) {
       {course.lessons.length > 0 && <Curriculum lessons={course.lessons} totalMinutes={course.totalMinutes} />}
       <Stack gap="sm" pt="xl" mt="md" style={{ borderTop: '1px solid var(--tb-border)' }}>
         <Text fz={13} c="dimmed" lh={1.6}>
-          You agree to share the information entered on this page with {SITE.name} (owner of this page) and our payment partner, in line with applicable laws.
+          You agree to share the information entered on this page with {SITE.name} (owner of this page) and our payment partner EPS (Easy Payment System), in line with applicable laws.
         </Text>
         <Group gap="lg" fz={13}>
           <Text fz={13}>{SITE.name} {new Date().getFullYear()}</Text>
@@ -79,7 +79,7 @@ function CourseInfo({ course }: { course: CourseDetail }) {
 
 function Highlights({ course }: { course: CourseDetail }) {
   const items = [
-    course.lessonCount > 0 && { icon: IconPlayerPlay, text: `${course.lessonCount} video lessons` },
+    course.lessonCount > 0 && { icon: IconPlayerPlay, text: `${course.lessonCount} video lesson${course.lessonCount === 1 ? '' : 's'}` },
     course.totalMinutes > 0 && { icon: IconClock, text: `${formatDuration(course.totalMinutes)} of content` },
     { icon: IconInfinity, text: 'Lifetime access and updates' },
     { icon: IconShieldCheck, text: '7-day refund policy' },
@@ -112,7 +112,7 @@ function Curriculum({ lessons, totalMinutes }: { lessons: LessonOutline[]; total
     <Stack gap="sm" mt="md">
       <Group justify="space-between" align="baseline">
         <Title order={2} fz={22}>What's inside</Title>
-        <Text c="dimmed" fz={14}>{lessons.length} lessons{totalMinutes ? ` · ${formatDuration(totalMinutes)}` : ''}</Text>
+        <Text c="dimmed" fz={14}>{lessons.length} lesson{lessons.length === 1 ? '' : 's'}{totalMinutes ? ` · ${formatDuration(totalMinutes)}` : ''}</Text>
       </Group>
       <Accordion variant="separated" radius="md" multiple defaultValue={['0']}>
         {sections.map((section, index) => (
@@ -120,7 +120,7 @@ function Curriculum({ lessons, totalMinutes }: { lessons: LessonOutline[]; total
             <Accordion.Control>
               <Group justify="space-between" pr="sm" wrap="nowrap">
                 <Text fw={600} fz={15}>{section.name || (sections.length > 1 ? `Part ${index + 1}` : 'Lessons')}</Text>
-                <Text c="dimmed" fz={13} style={{ whiteSpace: 'nowrap' }}>{section.lessons.length} lessons</Text>
+                <Text c="dimmed" fz={13} style={{ whiteSpace: 'nowrap' }}>{section.lessons.length} lesson{section.lessons.length === 1 ? '' : 's'}</Text>
               </Group>
             </Accordion.Control>
             <Accordion.Panel>
@@ -338,8 +338,9 @@ function CheckoutForm({ course }: { course: CourseDetail }) {
           {total === 0 ? 'Get instant access' : `Proceed to pay ${taka(total)}`}
         </Button>
         <Stack gap={10} align="center">
-          <div className="pay-methods">{['bKash', 'Nagad', 'Rocket', 'Upay', 'VISA', 'Mastercard', 'AMEX'].map((m) => <span key={m}>{m}</span>)}</div>
-          <Group gap={6} c="dimmed" fz={12}><IconLock size={14} />Secure checkout · Your course link is emailed instantly</Group>
+          <img src="/eps/pay-with-eps.webp" width={1200} height={207} alt="Pay with EPS: Visa, Mastercard, American Express, bKash, Nagad, Rocket and more"
+            loading="lazy" style={{ width: '100%', maxWidth: 400, height: 'auto' }} />
+          <Group gap={6} c="dimmed" fz={12}><IconLock size={14} />Secure payment by EPS · Your course link is emailed instantly</Group>
         </Stack>
       </Stack>
     </form>

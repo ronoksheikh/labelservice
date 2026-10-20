@@ -46,7 +46,7 @@ export const PRIVACY: StaticPage = {
 - To send you your course link, sign-in links and important updates about your purchase.
 - To answer your support questions.
 
-We never sell your information. We share it only with the services that run this website (Cloudflare for hosting, Resend for email and our payment provider) and only as much as they need.
+We never sell your information. We share it only with the services that run this website (Cloudflare for hosting, Resend for email and EPS (Easy Payment System) for payments) and only as much as they need.
 
 ## Your choices
 
@@ -94,7 +94,7 @@ export const STATIC_PAGES = [ABOUT, PRIVACY, TERMS, REFUNDS];
 
 export const FAQ: { q: string; a: string }[] = [
   { q: 'Do I need to create an account?', a: 'No. Just enter your name, email and phone number at checkout. After you pay, we email you a link that opens your course area. No password needed.' },
-  { q: 'How do I pay?', a: 'You can pay in Taka with bKash, Nagad, Rocket, Upay or any Visa, Mastercard or Amex card through our secure payment partner.' },
+  { q: 'How do I pay?', a: 'You pay in Taka through EPS (Easy Payment System). Use bKash, Nagad, Rocket, Upay, tap, OK Wallet, Islami Bank mCash, CellFin, or any Visa, Mastercard, American Express, UnionPay or DBBL Nexus card.' },
   { q: 'How long do I have access?', a: 'For life. Buy once and watch at your own pace, on any device, as many times as you like. You also get future updates to the course.' },
   { q: 'I bought a course. How do I watch it?', a: 'Open the link in your purchase email, or go to My courses and enter the email you used at checkout. We will send you a fresh sign-in link.' },
   { q: 'Can I get a refund?', a: 'Yes. If a course is not right for you, email us within 7 days of purchase. See the refund policy for details.' },

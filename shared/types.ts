@@ -175,6 +175,7 @@ export interface AdminOrder {
   source: string | null;
   paymentProvider: string | null;
   paymentRef: string | null;
+  paymentMethod: string | null;
   createdAt: number;
   paidAt: number | null;
 }

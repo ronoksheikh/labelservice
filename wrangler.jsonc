@@ -27,10 +27,14 @@
   "vars": {
     "SITE_URL": "https://twobytes.dev",
     "EMAIL_FROM": "twobytes.dev <hello@twobytes.dev>",
-    "EMAIL_REPLY_TO": "hello@twobytes.dev"
+    "EMAIL_REPLY_TO": "hello@twobytes.dev",
+    // EPS payment gateway: "live", "sandbox", or "" to turn online payment off.
+    "EPS_MODE": "live",
+    "EPS_MERCHANT_ID": "d67973fa-5292-4555-a807-f96486417a9e",
+    "EPS_STORE_ID": "8314C84B-175C-4337-AD35-31BAF8A1E0BC"
   },
   // Serves the site on twobytes.dev (the domain must be on this Cloudflare account). Remove to deploy on workers.dev only.
   "routes": [{ "pattern": "twobytes.dev", "custom_domain": true }],
-  // Secrets (bunx wrangler secret put …): SESSION_SECRET, ADMIN_PASSWORD, RESEND_API_KEY
+  // Secrets (bunx wrangler secret put …): SESSION_SECRET, ADMIN_PASSWORD, RESEND_API_KEY, EPS_USERNAME, EPS_PASSWORD, EPS_HASH_KEY
   "observability": { "enabled": true }
 }

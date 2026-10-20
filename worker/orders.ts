@@ -4,7 +4,7 @@ import { Courses } from './courses';
 import { Coupons } from './coupons';
 import { purchaseEmail, sendEmail } from './email';
 import { HttpError } from './errors';
-import { paymentGateway } from './payments';
+import { newTransactionId, paymentGateway } from './payments';
 import { applyCoupon, orderTotal } from './pricing';
 import { PURCHASE_LINK_DAYS, Students } from './students';
 
@@ -22,6 +22,8 @@ interface OrderRow {
   status: OrderStatus;
   payment_provider: string | null;
   payment_ref: string | null;
+  payment_txn: string | null;
+  payment_method: string | null;
   visitor_id: string | null;
   source: string | null;
   created_at: number;
@@ -51,7 +53,7 @@ export class Orders {
 
   /** Price the cart on the server, save the order and start payment. */
   async checkout(input: Required<Omit<CheckoutRequest, 'coupon' | 'visitorId' | 'source'>> & Pick<CheckoutRequest, 'coupon' | 'visitorId' | 'source'>,
-    origin: string, waitUntil: (promise: Promise<unknown>) => void) {
+    origin: string, ip: string | null, waitUntil: (promise: Promise<unknown>) => void) {
     const courses = new Courses(this.db);
     const course = await courses.bySlug(input.slug);
     if (!course || course.status !== 'published') throw new HttpError(404, 'This course is not available.');
@@ -91,13 +93,40 @@ export class Orders {
     }
     const gateway = paymentGateway(this.env);
     if (!gateway) return { orderId: id, key, redirectUrl: null };
-    const back = `${origin}/checkout/${id}?k=${key}`;
-    const redirectUrl = await gateway.start(
-      { id, total, name: input.name, email: input.email, phone: input.phone, items },
-      { success: back, fail: `${back}&result=failed`, cancel: `${back}&result=cancelled` },
-    );
-    await this.db.prepare('UPDATE orders SET payment_provider = ? WHERE id = ?').bind(gateway.name, id).run();
-    return { orderId: id, key, redirectUrl };
+    const transactionId = newTransactionId();
+    await this.db.prepare('UPDATE orders SET payment_provider = ?, payment_txn = ? WHERE id = ?').bind(gateway.name, transactionId, id).run();
+    // The gateway sends the buyer back here; the Worker verifies the payment before showing the order page.
+    const back = (result: string) => `${origin}/api/payments/${gateway.name}/return?order=${id}&k=${key}&result=${result}`;
+    try {
+      const redirectUrl = await gateway.start(
+        { id, transactionId, total, name: input.name, email: input.email, phone: input.phone, ip, items },
+        { success: back('success'), fail: back('failed'), cancel: back('cancelled') },
+      );
+      return { orderId: id, key, redirectUrl };
+    } catch (error) {
+      console.error(`Starting payment for order ${id} failed`, error);
+      await this.db.prepare(`UPDATE orders SET status = 'failed' WHERE id = ?`).bind(id).run();
+      throw new HttpError(502, "We couldn't reach the payment gateway. Please try again in a minute.");
+    }
+  }
+
+  /**
+   * Ask the gateway whether an unpaid order has been paid, and fulfil it if so. Returns true when the order is paid.
+   * Called when the buyer returns from the gateway and while the order page is open.
+   */
+  async confirmPayment(order: OrderRow, origin: string, waitUntil: (promise: Promise<unknown>) => void) {
+    if (order.status === 'paid') return true;
+    const gateway = paymentGateway(this.env);
+    if (!gateway || order.payment_provider !== gateway.name || !order.payment_txn) return false;
+    const result = await gateway.verify(order.payment_txn);
+    if (result.status !== 'paid') return false;
+    if (result.amount + 0.001 < order.total) {
+      console.error(`Order ${order.id}: ${gateway.name} reports ${result.amount} paid, expected ${order.total}. Not fulfilling.`);
+      return false;
+    }
+    await this.db.prepare('UPDATE orders SET payment_method = ? WHERE id = ?').bind(result.method, order.id).run();
+    await this.fulfill(order.id, gateway.name, result.reference, origin, waitUntil);
+    return true;
   }
 
   /**
@@ -140,6 +169,7 @@ export class Orders {
   }
 
   async setStatus(id: string, status: 'failed' | 'cancelled') {
+    // Only unpaid orders change; a paid order is never downgraded.
     const result = await this.db.prepare(`UPDATE orders SET status = ? WHERE id = ? AND status <> 'paid'`).bind(status, id).run();
     if (!result.meta.changes) throw new HttpError(409, 'Paid orders cannot be cancelled here.');
   }
@@ -162,7 +192,7 @@ export class Orders {
     return results.map((row) => ({
       id: row.id, status: row.status, name: row.name, email: row.email, phone: row.phone, courseTitle: row.course_title,
       items: (items.get(row.id) ?? []).map((item) => item.title), couponCode: row.coupon_code, subtotal: row.subtotal,
-      discount: row.discount, total: row.total, source: row.source, paymentProvider: row.payment_provider, paymentRef: row.payment_ref,
+      discount: row.discount, total: row.total, source: row.source, paymentProvider: row.payment_provider, paymentRef: row.payment_ref, paymentMethod: row.payment_method,
       createdAt: row.created_at, paidAt: row.paid_at,
     }));
   }

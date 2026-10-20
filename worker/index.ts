@@ -10,6 +10,7 @@ import { Courses } from './courses';
 import { loginEmail, sendEmail } from './email';
 import { badRequest, HttpError, notFound } from './errors';
 import { Orders } from './orders';
+import { paymentGateway } from './payments';
 import { applyCoupon } from './pricing';
 import { breadcrumbs, courseHtml, courseList, courseSchema, homeHtml, organization, renderPage, shellHtml, website } from './seo';
 import { LOGIN_LINK_MINUTES, Students } from './students';
@@ -36,7 +37,8 @@ api.onError((error, c) => {
 
 api.use('*', async (c, next) => {
   // A custom header can't be sent cross-site without a CORS preflight, which blocks CSRF on cookie-authenticated requests.
-  if (c.req.method !== 'GET' && c.req.header('X-Requested-With') !== 'twobytes') throw new HttpError(403, 'Missing X-Requested-With header.');
+  // Payment gateways post back to /payments/* from their own pages, so those routes are exempt (they verify server-side).
+  if (c.req.method !== 'GET' && !c.req.path.startsWith('/api/payments/') && c.req.header('X-Requested-With') !== 'twobytes') throw new HttpError(403, 'Missing X-Requested-With header.');
   await next();
   if (!c.res.headers.has('Cache-Control')) c.header('Cache-Control', 'no-store');
 });
@@ -83,14 +85,42 @@ api.post('/checkout', async (c) => {
     bump: body.bump === true,
     visitorId,
     source,
-  }, origin(c), waitUntil(c));
+  }, origin(c), c.req.header('CF-Connecting-IP') ?? null, waitUntil(c));
   return c.json(result);
+});
+
+/**
+ * EPS sends the buyer back here (success, fail or cancel URL). We never trust the query string: the payment is
+ * verified with EPS before the order is marked paid. Then the buyer lands on their order page.
+ */
+api.on(['GET', 'POST'], '/payments/eps/return', async (c) => {
+  const id = c.req.query('order') ?? '';
+  const key = c.req.query('k') ?? '';
+  const orders = new Orders(c.env);
+  const order = await orders.byId(id);
+  if (!order || order.access_key !== key) return c.redirect('/', 302);
+  let paid = false;
+  try {
+    paid = await orders.confirmPayment(order, origin(c), waitUntil(c));
+  } catch (error) {
+    console.error(`Verifying EPS payment for order ${id} failed`, error);
+  }
+  const result = c.req.query('result');
+  if (!paid && (result === 'failed' || result === 'cancelled')) await orders.setStatus(id, result).catch(() => undefined);
+  return c.redirect(`/checkout/${id}?k=${encodeURIComponent(key)}`, 302);
 });
 
 /** The buyer's browser polls this after checkout. Once paid, it signs that browser in to the course area. */
 api.get('/orders/:id', async (c) => {
   const orders = new Orders(c.env);
-  const receipt = await orders.receipt(c.req.param('id'), c.req.query('k') ?? '');
+  const id = c.req.param('id');
+  const key = c.req.query('k') ?? '';
+  // Still waiting: ask the gateway in case the buyer paid but never came back through the return URL.
+  const pending = await orders.byId(id);
+  if (pending && pending.access_key === key && pending.status === 'initiated' && pending.payment_txn) {
+    await orders.confirmPayment(pending, origin(c), waitUntil(c)).catch((error) => console.error(`Payment check for ${id} failed`, error));
+  }
+  const receipt = await orders.receipt(id, key);
   if (!receipt) return notFound('Order not found.');
   let signedIn = false;
   if (receipt.status === 'paid') {
@@ -179,7 +209,10 @@ api.put('/my/lessons/:id/progress', async (c) => {
 
 /* ---------- Admin ---------- */
 
-api.get('/admin/session', async (c) => c.json({ signedIn: await isAdmin(c), configured: Boolean(c.env.ADMIN_PASSWORD) }));
+api.get('/admin/session', async (c) => c.json({
+  signedIn: await isAdmin(c), configured: Boolean(c.env.ADMIN_PASSWORD),
+  payments: paymentGateway(c.env) ? c.env.EPS_MODE : 'off',
+}));
 
 api.post('/admin/login', async (c) => {
   const password = str((await jsonBody(c)).password, 'Password', { max: 200 });
@@ -295,6 +328,15 @@ admin.post('/orders/:id/mark-paid', async (c) => {
   const reference = str((await jsonBody(c)).reference, 'Reference', { max: 120 }) || null;
   await new Orders(c.env).fulfill(c.req.param('id'), 'manual', reference, origin(c), waitUntil(c));
   return c.json({ ok: true });
+});
+
+/** Ask EPS about an unpaid order (e.g. the buyer says they paid). Fulfils it if EPS confirms the payment. */
+admin.post('/orders/:id/check-payment', async (c) => {
+  const orders = new Orders(c.env);
+  const order = await orders.byId(c.req.param('id'));
+  if (!order) return notFound('Order not found.');
+  if (!order.payment_txn) return badRequest('This order never reached the payment gateway.');
+  return c.json({ paid: await orders.confirmPayment(order, origin(c), waitUntil(c)) });
 });
 
 admin.post('/orders/:id/cancel', async (c) => {

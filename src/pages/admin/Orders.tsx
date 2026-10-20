@@ -1,6 +1,7 @@
 import { ActionIcon, Alert, Button, Group, Menu, Modal, Paper, SegmentedControl, Skeleton, Stack, Table, Text, TextInput } from '@mantine/core';
 import { useDebouncedValue } from '@mantine/hooks';
 import { modals } from '@mantine/modals';
+import { notifications } from '@mantine/notifications';
 import { IconDots, IconSearch } from '@tabler/icons-react';
 import { useState } from 'react';
 import type { AdminOrder } from '../../../shared/types';
@@ -33,6 +34,17 @@ export function OrdersAdmin() {
       notifyError(reason);
     } finally {
       setBusy(false);
+    }
+  }
+
+  async function checkPayment(order: AdminOrder) {
+    try {
+      const { paid } = await api<{ paid: boolean }>(`/admin/orders/${order.id}/check-payment`, { body: {} });
+      if (paid) notifySuccess(`EPS confirmed the payment. ${order.email} has been enrolled and emailed.`);
+      else notifications.show({ color: 'gray', message: 'EPS has no completed payment for this order yet.' });
+      await reload();
+    } catch (reason) {
+      notifyError(reason);
     }
   }
 
@@ -78,7 +90,11 @@ export function OrdersAdmin() {
                   <Table.Td ta="right" fw={600}>{taka(order.total)}</Table.Td>
                   <Table.Td>
                     <OrderStatusBadge status={order.status} />
-                    {order.paymentProvider && <Text fz={11} c="dimmed" mt={2}>{order.paymentProvider}{order.paymentRef ? ` · ${order.paymentRef}` : ''}</Text>}
+                    {order.paymentProvider && (
+                      <Text fz={11} c="dimmed" mt={2} tt="none">
+                        {[order.paymentProvider.toUpperCase(), order.paymentMethod, order.paymentRef].filter(Boolean).join(' · ')}
+                      </Text>
+                    )}
                   </Table.Td>
                   <Table.Td><Text fz={13} tt="capitalize">{order.source ?? '—'}</Text></Table.Td>
                   <Table.Td ta="right">
@@ -86,6 +102,7 @@ export function OrdersAdmin() {
                       <Menu position="bottom-end" withinPortal>
                         <Menu.Target><ActionIcon variant="subtle" color="gray" aria-label="Actions"><IconDots size={18} /></ActionIcon></Menu.Target>
                         <Menu.Dropdown>
+                          {order.paymentProvider === 'eps' && <Menu.Item onClick={() => void checkPayment(order)}>Check payment with EPS</Menu.Item>}
                           <Menu.Item onClick={() => { setPaying(order); setReference(''); }}>Mark as paid…</Menu.Item>
                           {order.status === 'initiated' && <Menu.Item color="red" onClick={() => cancel(order)}>Cancel order</Menu.Item>}
                         </Menu.Dropdown>

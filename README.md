@@ -6,7 +6,7 @@ The course platform for **twobytes.dev**, run by Fahimun Tasin and Ronok Sheikh.
 - **API:** [Hono](https://hono.dev) under `/api/*` (`worker/index.ts`).
 - **Database:** D1 (`migrations/0001_init.sql`). Prices are whole Taka (BDT).
 - **Email:** [Resend](https://resend.com) for purchase and sign-in emails.
-- **Payments:** not connected yet. EPS (Easy Payment System) plugs into `worker/payments.ts`.
+- **Payments:** [EPS](https://www.eps.com.bd) (Easy Payment System): bKash, Nagad, Rocket, Upay and cards, in Taka.
 
 ## What's inside
 
@@ -23,7 +23,7 @@ The course platform for **twobytes.dev**, run by Fahimun Tasin and Ronok Sheikh.
 - **Dashboard:** visitors, checkouts started, purchases, revenue and conversion rate for today, 7, 30 or 90 days (Bangladesh time). Also a daily chart, per-course funnel, traffic sources (Facebook is detected from `fbclid` and referrers), countries and the latest orders.
 - **Courses:** title, URL slug, description (simple Markdown with preview), cover upload to R2, price and struck-through regular price, draft or published, sort order, the checkout offer, and a lessons editor. Editing lessons keeps student progress.
 - **Coupons:** percent or Taka off, for all courses or one course, with max uses, expiry and on/off.
-- **Orders:** every checkout, paid or not (unpaid ones are leads to follow up). **Mark as paid** records a payment taken outside the site, enrolls the buyer and emails them. This is also how you test the full flow before EPS is connected.
+- **Orders:** every checkout, paid or not (unpaid ones are leads to follow up). **Mark as paid** records a payment taken outside the site, enrolls the buyer and emails them. Payments made through EPS are marked paid automatically.
 - **Students:** search, see their courses and spend, grant or remove access.
 
 **SEO and speed**
@@ -44,6 +44,9 @@ bunx wrangler r2 bucket create twobytes-media
 bunx wrangler secret put SESSION_SECRET        # any long random string
 bunx wrangler secret put ADMIN_PASSWORD        # admin panel password
 bunx wrangler secret put RESEND_API_KEY        # from resend.com, with twobytes.dev verified as a sending domain
+bunx wrangler secret put EPS_USERNAME          # EPS live merchant login
+bunx wrangler secret put EPS_PASSWORD
+bunx wrangler secret put EPS_HASH_KEY
 bun run deploy                                 # build, apply D1 migrations, deploy
 ```
 
@@ -60,15 +63,27 @@ bun run dev                       # http://localhost:5173 , admin at /admin
 
 Without `RESEND_API_KEY`, emails (including sign-in links) are printed in the terminal. `bun run test` runs the unit tests and `bun run typecheck` checks the app and Worker.
 
-## Connecting EPS
+## Payments (EPS)
 
-`worker/payments.ts` defines the gateway interface. When the EPS details are in:
+Online payment goes through **EPS (Easy Payment System)** (`worker/eps.ts`, API guide v5):
 
-1. Implement `start()` to create the EPS payment and return its URL. Checkout already sends the buyer there, with success, fail and cancel URLs that return to `/checkout/<order>`.
-2. Add the EPS callback or IPN route in `worker/index.ts`. Verify the payment with EPS, then call `new Orders(env).fulfill(orderId, 'eps', transactionId, origin, waitUntil)`. It is idempotent. It marks the order paid, enrolls the buyer in every course on it, counts the coupon use and sends the email.
-3. Mark failed or cancelled payments with `Orders.setStatus`.
+1. **Checkout** saves the order, gets an EPS token (`/Auth/GetToken`, cached), and starts the payment (`/EPSEngine/InitializeEPS`) with a unique `merchantTransactionId`. Then it sends the buyer to the EPS payment page (bKash, Nagad, Rocket, Upay, cards and more).
+2. EPS sends the buyer back to `/api/payments/eps/return`. The Worker **doesn't trust the redirect**. It asks EPS (`/EPSEngine/CheckMerchantTransactionStatus`), checks that the amount matches, and only then marks the order paid, enrolls the buyer and emails them. A fail or cancel return marks the order failed or cancelled.
+3. If the buyer pays but closes the tab before coming back, the order page (which polls) still picks up the payment from EPS. In the admin, **Orders → Check payment with EPS** does the same.
 
-The order page polls its status, so the buyer sees "You're in!" as soon as the payment is confirmed.
+Every request is signed with an `x-hash` header: Base64 HMAC-SHA512 using the EPS hash key.
+
+**Configuration**
+- `wrangler.jsonc` vars: `EPS_MODE` (`live`, `sandbox`, or empty for off), `EPS_MERCHANT_ID`, `EPS_STORE_ID`.
+- Secrets: `EPS_USERNAME`, `EPS_PASSWORD`, `EPS_HASH_KEY`.
+
+```sh
+bunx wrangler secret put EPS_USERNAME
+bunx wrangler secret put EPS_PASSWORD
+bunx wrangler secret put EPS_HASH_KEY
+```
+
+For local development, put the **sandbox** merchant from EPS's sandbox credentials document into `.dev.vars`, with `EPS_MODE=sandbox`. With EPS off, orders wait in the admin for **Mark as paid**. The admin header shows which payment mode is active.
 
 ## Layout
 

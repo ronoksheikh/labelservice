@@ -2,6 +2,8 @@ import { describe, expect, test } from 'bun:test';
 import { markdownToText, renderMarkdown } from '../shared/markdown';
 import { isBdPhone, normalizePhone, slugify, taka, videoEmbed } from '../shared/site';
 import { trafficSource } from '../shared/source';
+import { epsHash } from '../worker/eps';
+import { newTransactionId } from '../worker/payments';
 import { applyCoupon, orderTotal, type CouponRow } from '../worker/pricing';
 
 const coupon = (patch: Partial<CouponRow> = {}): CouponRow => ({
@@ -68,5 +70,17 @@ describe('site helpers', () => {
     expect(trafficSource('https://twobytes.dev/', 'https://l.facebook.com/', 'twobytes.dev')).toBe('facebook');
     expect(trafficSource('https://twobytes.dev/?utm_source=Newsletter', '', 'twobytes.dev')).toBe('newsletter');
     expect(trafficSource('https://twobytes.dev/', 'https://twobytes.dev/about', 'twobytes.dev')).toBe('direct');
+  });
+});
+
+describe('EPS', () => {
+  test('x-hash is Base64 HMAC-SHA512 keyed with the UTF-8 hash key', async () => {
+    expect(await epsHash('test-hash-key', 'buyer@example.com'))
+      .toBe('PKqRbWwp4kFR4NUdFxZo6+DB9lHfwDtWFR6yziuwcu+F4SnMqz0FEaRmp94dqPAPdbXFB7zWa4fz0B9m29yrTw==');
+  });
+  test('merchant transaction ids are unique digit strings of at least 10 digits', () => {
+    const ids = new Set(Array.from({ length: 50 }, newTransactionId));
+    expect([...ids].every((id) => /^\d{10,}$/.test(id))).toBe(true);
+    expect(ids.size).toBeGreaterThan(40);
   });
 });

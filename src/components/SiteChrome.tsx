@@ -63,7 +63,12 @@ export function SiteFooter() {
             </Stack>
           </Group>
         </Group>
-        <Text c="dimmed" fz={13} mt={40}>© {new Date().getFullYear()} {SITE.name}. Prices in Bangladeshi Taka (BDT).</Text>
+        <picture>
+          <source media="(min-width: 48em)" srcSet="/eps/footer-desktop.webp" width={2400} height={123} />
+          <img src="/eps/footer-mobile.webp" width={1200} height={216} loading="lazy" alt="Pay with Visa, Mastercard, American Express, DBBL Nexus, bKash, Nagad, Rocket, Upay and more. Verified by EPS."
+            style={{ display: 'block', width: '100%', height: 'auto', marginTop: 40, borderRadius: 12 }} />
+        </picture>
+        <Text c="dimmed" fz={13} mt={24}>© {new Date().getFullYear()} {SITE.name}. Prices in Bangladeshi Taka (BDT).</Text>
       </Container>
     </Box>
   );

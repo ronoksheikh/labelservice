@@ -51,18 +51,23 @@ export function CheckoutStatus() {
               ) : order.status === 'initiated' ? (
                 <Stack align="center" ta="center" gap="sm">
                   <ThemeIcon size={64} radius="xl" color="ink" variant="light"><IconClockHour4 size={32} /></ThemeIcon>
-                  <Title order={1} fz={26}>Order received</Title>
+                  <Title order={1} fz={26}>Waiting for your payment</Title>
                   <Text c="dimmed" maw={420}>
-                    We've saved your order and are waiting for payment. Online payment is being connected. We'll contact you
-                    at <b>{order.email}</b> to complete it, and this page updates the moment it's paid.
+                    If you've just paid, hang on: this page updates as soon as the payment is confirmed, and we'll email
+                    your course link to <b>{order.email}</b>.
                   </Text>
                   <Group gap={8} c="dimmed" fz={13}><Loader size={12} color="gray" />Checking payment status…</Group>
+                  {first && (
+                    <Button component={Link} to={`/courses/${first.slug}`} variant="default" mt="xs">
+                      Closed the payment page? Try again
+                    </Button>
+                  )}
                 </Stack>
               ) : (
                 <Stack align="center" ta="center" gap="sm">
                   <ThemeIcon size={64} radius="xl" color="red" variant="light"><IconAlertTriangle size={32} /></ThemeIcon>
                   <Title order={1} fz={26}>{order.status === 'cancelled' ? 'Order cancelled' : "Payment didn't go through"}</Title>
-                  <Text c="dimmed">No money was taken. You can try again; it only takes a minute.</Text>
+                  <Text c="dimmed">No money was taken. You can try again; it only takes a minute. If money was deducted, email us and we'll sort it out.</Text>
                   {first && <Button component={Link} to={`/courses/${first.slug}`} size="lg" mt="sm" fullWidth>Try again</Button>}
                 </Stack>
               )}

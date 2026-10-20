@@ -6,4 +6,8 @@ interface Env {
   ADMIN_PASSWORD?: string;
   /** Resend API key. Without it, emails are printed to the Worker log instead of sent. */
   RESEND_API_KEY?: string;
+  /** EPS merchant login and hash key. EPS_MODE, EPS_MERCHANT_ID and EPS_STORE_ID are vars in wrangler.jsonc. */
+  EPS_USERNAME?: string;
+  EPS_PASSWORD?: string;
+  EPS_HASH_KEY?: string;
 }

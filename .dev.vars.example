@@ -2,3 +2,11 @@ SESSION_SECRET=any-long-random-string-at-least-16-chars
 ADMIN_PASSWORD=change-me
 # Leave empty locally to print emails to the terminal instead of sending them.
 RESEND_API_KEY=
+# EPS payments. "sandbox" uses EPS's test servers; fill in the sandbox merchant from EPS's sandbox credentials document.
+# Leave EPS_MODE empty to turn online payment off locally (orders then wait for "Mark as paid" in the admin).
+EPS_MODE=sandbox
+EPS_MERCHANT_ID=
+EPS_STORE_ID=
+EPS_USERNAME=
+EPS_PASSWORD=
+EPS_HASH_KEY=

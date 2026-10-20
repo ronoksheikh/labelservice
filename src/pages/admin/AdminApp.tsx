@@ -1,4 +1,4 @@
-import { AppShell, Burger, Button, Center, Group, Loader, NavLink as MantineNavLink, Paper, PasswordInput, Stack, Text, Title, Alert } from '@mantine/core';
+import { AppShell, Badge, Burger, Tooltip, Button, Center, Group, Loader, NavLink as MantineNavLink, Paper, PasswordInput, Stack, Text, Title, Alert } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import { IconBook2, IconChartBar, IconExternalLink, IconLogout, IconReceipt, IconTicket, IconUsers } from '@tabler/icons-react';
 import { useEffect, useState, type FormEvent, type ReactNode } from 'react';
@@ -24,7 +24,7 @@ const nav = [
 
 export function AdminApp() {
   useSeo('Admin');
-  const session = useApi<{ signedIn: boolean; configured: boolean }>('/admin/session');
+  const session = useApi<{ signedIn: boolean; configured: boolean; payments?: string }>('/admin/session');
   useEffect(() => {
     const onSignedOut = () => session.setData((current) => current && { ...current, signedIn: false });
     window.addEventListener('twobytes:admin-signed-out', onSignedOut);
@@ -33,7 +33,7 @@ export function AdminApp() {
 
   if (!session.data) return <Center h="100dvh"><Loader color="ink" type="dots" /></Center>;
   if (!session.data.signedIn) return <AdminLogin configured={session.data.configured} onSignedIn={() => void session.reload()} />;
-  return <AdminShell onSignedOut={() => session.setData({ signedIn: false, configured: true })} />;
+  return <AdminShell payments={session.data.payments ?? 'off'} onSignedOut={() => session.setData({ signedIn: false, configured: true })} />;
 }
 
 function AdminLogin({ configured, onSignedIn }: { configured: boolean; onSignedIn: () => void }) {
@@ -68,7 +68,7 @@ function AdminLogin({ configured, onSignedIn }: { configured: boolean; onSignedI
   );
 }
 
-function AdminShell({ onSignedOut }: { onSignedOut: () => void }) {
+function AdminShell({ payments, onSignedOut }: { payments: string; onSignedOut: () => void }) {
   const [opened, { toggle, close }] = useDisclosure();
   const location = useLocation();
   useEffect(close, [location.pathname, close]);
@@ -85,7 +85,14 @@ function AdminShell({ onSignedOut }: { onSignedOut: () => void }) {
             <Logo size={22} to="/admin" />
             <Text fz={12} fw={700} c="dimmed" tt="uppercase" style={{ letterSpacing: '0.08em' }}>Admin</Text>
           </Group>
+          <Group gap="sm">
+          <Tooltip label={payments === 'off' ? 'EPS is not configured: orders wait for Mark as paid' : `EPS ${payments} mode`}>
+            <Badge variant="light" color={payments === 'live' ? 'teal' : payments === 'sandbox' ? 'orange' : 'gray'} radius="sm" visibleFrom="xs">
+              Payments: {payments === 'off' ? 'off' : `EPS ${payments}`}
+            </Badge>
+          </Tooltip>
           <Button component="a" href="/" target="_blank" variant="default" size="xs" rightSection={<IconExternalLink size={14} />}>View site</Button>
+          </Group>
         </Group>
       </AppShell.Header>
       <AppShell.Navbar p="sm">
